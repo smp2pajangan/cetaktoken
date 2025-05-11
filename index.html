@@ -16,18 +16,18 @@
     }
     h2 {
       text-align: center;
-      margin-bottom: 1em; /* Jarak 1 em ke bawah */
+      margin-bottom: 1em;
     }
     .print-button-container {
-      position: fixed; /* Agar tetap di posisi saat di-scroll */
+      position: fixed;
       top: 10px;
       left: 10px;
-      z-index: 10; /* Agar berada di atas konten lain */
+      z-index: 10;
     }
     .print-button {
       padding: 15px 30px;
-      font-size: 20px; /* Ukuran lebih besar */
-      background-color: #28a745; /* Warna hijau */
+      font-size: 20px;
+      background-color: #28a745;
       color: white;
       border: none;
       border-radius: 5px;
@@ -42,12 +42,12 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px; /* Kembalikan margin atas tabel */
+      margin-top: 20px;
     }
     th {
       background-color: #f4f4f4;
       text-align: center;
-      border: 1px solid black; /* Tambahkan border untuk th */
+      border: 1px solid black;
       padding: 8px;
       font-size: 10pt;
     }
@@ -55,13 +55,13 @@
       border: 1px solid black;
       padding: 8px;
       font-size: 10pt;
-      text-align: center; /* Rata tengah untuk semua sel data */
+      text-align: center;
     }
-    td:nth-child(2) { /* Kolom kedua adalah Mapel */
-      text-align: left; /* Rata kiri untuk kolom Mapel */
+    td:nth-child(2) {
+      text-align: left;
     }
-    td:nth-child(4) { /* Kolom keempat adalah Token */
-      font-weight: bold; /* Membuat teks menjadi tebal */
+    td:nth-child(4) {
+      font-weight: bold;
     }
     .instruction-text {
       text-align: left;
@@ -108,7 +108,6 @@
     const db = getDatabase(app);
     const tokensRef = ref(db, 'tokens');
 
-    // Fungsi untuk mendapatkan parameter dari URL
     function getQueryParam(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
@@ -163,15 +162,6 @@
         tbody.appendChild(row);
       });
     });
-
-    // Hapus otomatis print saat halaman diload (yang lama)
-    // window.onload = function() {
-    //   window.print();
-    //   window.onafterprint = function() {
-    //     // Optional: kembali ke halaman sebelumnya setelah cetak
-    //     // window.history.back();
-    //   };
-    // };
   </script>
 </body>
 </html>
