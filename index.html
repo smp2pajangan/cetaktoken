@@ -92,6 +92,7 @@
     const pageTitleElement = document.getElementById('printPageTitle');
     const documentTitleElement = document.getElementById('printDocumentTitle');
     const urlTitle = getQueryParam('title');
+    const printButton = document.querySelector('.print-button-container button'); // Dapatkan referensi tombol
 
     if (urlTitle) {
       pageTitleElement.innerText = decodeURIComponent(urlTitle);
@@ -137,9 +138,16 @@
         `;
         tbody.appendChild(row);
       });
+
+      // Klik tombol cetak setelah DOM selesai dimuat
+      document.addEventListener('DOMContentLoaded', (event) => {
+        if (printButton) {
+          printButton.click();
+        }
+      });
     });
 
-    // Hapus otomatis print saat halaman diload
+    // Hapus otomatis print saat halaman diload (yang lama)
     // window.onload = function() {
     //   window.print();
     //   window.onafterprint = function() {
