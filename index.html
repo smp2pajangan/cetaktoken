@@ -18,26 +18,8 @@
       text-align: center;
       margin-bottom: 1em;
     }
-    .print-button-container {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 10;
-    }
-    .print-button {
-      padding: 15px 30px;
-      font-size: 20px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-    }
     .no-print {
-      @media print {
-        display: none;
-      }
+      display: none; /* Menyembunyikan elemen ini saat dicetak */
     }
     table {
       width: 100%;
@@ -70,9 +52,6 @@
   </style>
 </head>
 <body>
-  <div class="print-button-container no-print">
-    <button class="print-button" onclick="window.print()">Lanjutkan Mencetak</button>
-  </div>
   <h2 id="printDocumentTitle" style="text-align: center;">Daftar Token</h2>
   <p class="instruction-text">Berikut adalah daftar token ujian:</p>
   <table id="printTable">
