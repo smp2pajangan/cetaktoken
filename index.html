@@ -17,20 +17,20 @@
     h2 {
       text-align: center;
     }
-    .print-button-container {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 10px;
-    }
     .no-print {
       @media print {
         display: none;
       }
     }
+    .print-button-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 10px;
     }
     th, td {
       border: 1px solid black;
@@ -42,10 +42,59 @@
       background-color: #f4f4f4;
       text-align: center;
     }
+    /* CSS untuk Modal */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto; /* 15% from the top and centered */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%; /* Could be more or less, depending on screen size */
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .modal-button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      border: none;
+    }
+
+    .modal-button.yakin {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .modal-button.batal {
+      background-color: #dc3545;
+      color: white;
+    }
   </style>
 </head>
 <body>
-  <div class="print-button-container no-print">
+  <div id="printModal" class="modal">
+    <div class="modal-content">
+      <p>Apakah Anda yakin ingin mencetak daftar token?</p>
+      <button class="modal-button yakin" onclick="triggerPrint()">Cetak</button>
+      <button class="modal-button batal" onclick="closePrintModal()">Batal</button>
+    </div>
+  </div>
+
+  <div class="print-button-container no-print" style="display: none;">
     <button onclick="window.print()">Cetak Daftar</button>
   </div>
   <h2 id="printDocumentTitle" style="text-align: center;">Daftar Token</h2>
@@ -82,6 +131,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const tokensRef = ref(db, 'tokens');
+    const printModal = document.getElementById('printModal');
 
     // Fungsi untuk mendapatkan parameter dari URL
     function getQueryParam(name) {
@@ -96,6 +146,23 @@
     if (urlTitle) {
       pageTitleElement.innerText = decodeURIComponent(urlTitle);
       documentTitleElement.innerText = decodeURIComponent(urlTitle);
+    }
+
+    function triggerPrint() {
+      window.print();
+      window.onafterprint = function() {
+        closePrintModal();
+        // Optional: kembali ke halaman sebelumnya setelah cetak
+        // window.history.back();
+      };
+    }
+
+    function openPrintModal() {
+      printModal.style.display = "block";
+    }
+
+    function closePrintModal() {
+      printModal.style.display = "none";
     }
 
     onValue(tokensRef, (snapshot) => {
@@ -137,16 +204,12 @@
         `;
         tbody.appendChild(row);
       });
-    });
 
-    // Hapus otomatis print saat halaman diload
-    // window.onload = function() {
-    //   window.print();
-    //   window.onafterprint = function() {
-    //     // Optional: kembali ke halaman sebelumnya setelah cetak
-    //     // window.history.back();
-    //   };
-    // };
+      // Munculkan modal setelah data selesai dimuat dan ditampilkan
+      document.addEventListener('DOMContentLoaded', (event) => {
+        openPrintModal();
+      });
+    });
   </script>
 </body>
 </html>
