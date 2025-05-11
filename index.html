@@ -16,6 +16,7 @@
     }
     h2 {
       text-align: center;
+      margin-bottom: 1em; /* Jarak 1 em ke bawah */
     }
     .print-button-container {
       position: fixed; /* Agar tetap di posisi saat di-scroll */
@@ -41,7 +42,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 70px; /* Sesuaikan margin agar tidak tertutup tombol */
+      margin-top: 20px; /* Kembalikan margin atas tabel */
     }
     th, td {
       border: 1px solid black;
@@ -53,6 +54,10 @@
       background-color: #f4f4f4;
       text-align: center;
     }
+    .instruction-text {
+      text-align: left;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -60,7 +65,7 @@
     <button class="print-button" onclick="window.print()">Lanjutkan Mencetak</button>
   </div>
   <h2 id="printDocumentTitle" style="text-align: center;">Daftar Token</h2>
-  <p style="text-align: left; margin-bottom: 10px;">Berikut adalah daftar token ujian:</p>
+  <p class="instruction-text">Berikut adalah daftar token ujian:</p>
   <table id="printTable">
     <thead>
       <tr>
