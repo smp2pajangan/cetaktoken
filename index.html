@@ -44,15 +44,18 @@
       border-collapse: collapse;
       margin-top: 20px; /* Kembalikan margin atas tabel */
     }
-    th, td {
-      border: 1px solid black;
-      padding: 8px;
-      text-align: left;
-      font-size: 10pt;
-    }
     th {
       background-color: #f4f4f4;
       text-align: center;
+    }
+    td {
+      border: 1px solid black;
+      padding: 8px;
+      font-size: 10pt;
+      text-align: center; /* Rata tengah untuk semua sel data */
+    }
+    td:nth-child(2) { /* Kolom kedua adalah Mapel */
+      text-align: left; /* Rata kiri untuk kolom Mapel */
     }
     .instruction-text {
       text-align: left;
