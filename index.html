@@ -1,3 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title id="printPageTitle">Cetak Daftar Token</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin-top: 20mm;
+      margin-left: 35mm;
+      margin-bottom: 20cm;
+      margin-right: 20cm;
+    }
+    body {
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      text-align: center;
+    }
+    .no-print {
+      @media print {
+        display: none;
+      }
+    }
+    .print-button-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+      font-size: 10pt;
+    }
+    th {
+      background-color: #f4f4f4;
+      text-align: center;
+    }
+    /* CSS untuk Modal */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto; /* 15% from the top and centered */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%; /* Could be more or less, depending on screen size */
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .modal-button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      border: none;
+    }
+
+    .modal-button.yakin {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .modal-button.batal {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="printModal" class="modal">
+    <div class="modal-content">
+      <p>Apakah Anda yakin ingin mencetak daftar token?</p>
+      <button class="modal-button yakin" onclick="triggerPrint()">Cetak</button>
+      <button class="modal-button batal" onclick="closePrintModal()">Batal</button>
+    </div>
+  </div>
+
+  <div class="print-button-container no-print" style="display: none;">
+    <button onclick="window.print()">Cetak Daftar</button>
+  </div>
+  <h2 id="printDocumentTitle" style="text-align: center;">Daftar Token</h2>
+  <p style="text-align: left; margin-bottom: 10px;">Berikut adalah daftar token ujian:</p>
+  <table id="printTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Mapel</th>
+        <th>Kelas</th>
+        <th>Token</th>
+        <th>Token Dibuka</th>
+        <th>Token Ditutup</th>
+      </tr>
+    </thead>
+    <tbody id="printTableBody">
+    </tbody>
+  </table>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
@@ -108,3 +224,5 @@
       }
     });
   </script>
+</body>
+</html>
