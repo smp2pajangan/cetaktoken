@@ -7,9 +7,9 @@
     @page {
       size: A4 portrait;
       margin-top: 20mm;
-      margin-left: 35mm;
-      margin-bottom: 20cm;
-      margin-right: 20cm;
+      margin-left: 15mm;
+      margin-bottom: 20mm;
+      margin-right: 15mm;
     }
     body {
       font-family: Arial, sans-serif;
@@ -161,6 +161,11 @@
         `;
         tbody.appendChild(row);
       });
+
+      // Otomatis memicu pencetakan setelah data selesai dimuat dan ditampilkan
+      setTimeout(() => {
+        window.print();
+      }, 500); // Memberikan sedikit waktu agar tabel terisi sebelum mencetak
     });
   </script>
 </body>
