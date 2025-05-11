@@ -1,3 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title id="printPageTitle">Cetak Daftar Token</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin-top: 20mm;
+      margin-left: 35mm;
+      margin-bottom: 20cm;
+      margin-right: 20cm;
+    }
+    body {
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      text-align: center;
+    }
+    .print-button-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .no-print {
+      @media print {
+        display: none;
+      }
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+      font-size: 10pt;
+    }
+    th {
+      background-color: #f4f4f4;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="print-button-container no-print">
+    <button onclick="window.print()">Cetak Daftar</button>
+  </div>
+  <h2 id="printDocumentTitle">Daftar Token</h2>
+  <table id="printTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Mapel</th>
+        <th>Kelas</th>
+        <th>Token</th>
+        <th>Token Dibuka</th>
+        <th>Token Ditutup</th>
+      </tr>
+    </thead>
+    <tbody id="printTableBody">
+    </tbody>
+  </table>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
@@ -29,14 +95,6 @@
     if (urlTitle) {
       pageTitleElement.innerText = decodeURIComponent(urlTitle);
       documentTitleElement.innerText = decodeURIComponent(urlTitle);
-    }
-
-    function printThePage() {
-      window.print();
-      window.onafterprint = function() {
-        // Optional: kembali ke halaman sebelumnya setelah cetak
-        // window.history.back();
-      };
     }
 
     onValue(tokensRef, (snapshot) => {
@@ -78,10 +136,16 @@
         `;
         tbody.appendChild(row);
       });
-
-      // Cetak setelah data selesai dimuat dan ditampilkan
-      document.addEventListener('DOMContentLoaded', (event) => {
-        printThePage();
-      });
     });
+
+    // Hapus otomatis print saat halaman diload
+    // window.onload = function() {
+    //   window.print();
+    //   window.onafterprint = function() {
+    //     // Optional: kembali ke halaman sebelumnya setelah cetak
+    //     // window.history.back();
+    //   };
+    // };
   </script>
+</body>
+</html>
