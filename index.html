@@ -89,7 +89,7 @@
   <div id="printModal" class="modal">
     <div class="modal-content">
       <p>Apakah Anda ingin mencetak daftar token ujian ini?</p>
-      <button class="modal-button cetak" onclick="window.print()">Cetak Daftar</button>
+      <button class="modal-button cetak" onclick="handleCetakClick()">Cetak Daftar</button>
       <button class="modal-button batal" onclick="closePrintModal()">Batal</button>
     </div>
   </div>
@@ -145,19 +145,30 @@
       documentTitleElement.innerText = decodeURIComponent(urlTitle);
     }
 
+    function handleCetakClick() {
+      closePrintModal();
+      // Tunggu sebentar agar modal benar-benar tertutup sebelum mencetak
+      setTimeout(() => {
+        window.print();
+        window.onafterprint = function() {
+          // Optional: lakukan sesuatu setelah pencetakan (misalnya, membuka kembali modal jika perlu)
+        };
+      }, 100); // Jeda 100 milidetik
+    }
+
     function openPrintModal() {
       if (printModal) {
         printModal.style.display = "block";
-        console.log('Modal ditampilkan'); // Tambahan log
+        console.log('Modal ditampilkan');
       } else {
-        console.error('Elemen modal tidak ditemukan!'); // Tambahan log error
+        console.error('Elemen modal tidak ditemukan!');
       }
     }
 
     function closePrintModal() {
       if (printModal) {
         printModal.style.display = "none";
-        console.log('Modal ditutup'); // Tambahan log
+        console.log('Modal ditutup');
       }
     }
 
@@ -212,15 +223,6 @@
         });
       }
     });
-
-    // Tidak perlu lagi tombol cetak di luar modal
-    // window.onload = function() {
-    //   window.print();
-    //   window.onafterprint = function() {
-    //     // Optional: kembali ke halaman sebelumnya setelah cetak
-    //     // window.history.back();
-    //   };
-    // };
   </script>
 </body>
 </html>
