@@ -18,9 +18,20 @@
       text-align: center;
     }
     .print-button-container {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 10px;
+      position: fixed; /* Agar tetap di posisi saat di-scroll */
+      top: 10px;
+      left: 10px;
+      z-index: 10; /* Agar berada di atas konten lain */
+    }
+    .print-button {
+      padding: 15px 30px;
+      font-size: 20px; /* Ukuran lebih besar */
+      background-color: #28a745; /* Warna hijau */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     }
     .no-print {
       @media print {
@@ -30,7 +41,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 70px; /* Sesuaikan margin agar tidak tertutup tombol */
     }
     th, td {
       border: 1px solid black;
@@ -46,7 +57,7 @@
 </head>
 <body>
   <div class="print-button-container no-print">
-    <button onclick="window.print()">Cetak Daftar</button>
+    <button class="print-button" onclick="window.print()">Lanjutkan Mencetak</button>
   </div>
   <h2 id="printDocumentTitle" style="text-align: center;">Daftar Token</h2>
   <p style="text-align: left; margin-bottom: 10px;">Berikut adalah daftar token ujian:</p>
@@ -92,7 +103,6 @@
     const pageTitleElement = document.getElementById('printPageTitle');
     const documentTitleElement = document.getElementById('printDocumentTitle');
     const urlTitle = getQueryParam('title');
-    const printButton = document.querySelector('.print-button-container button'); // Dapatkan referensi tombol
 
     if (urlTitle) {
       pageTitleElement.innerText = decodeURIComponent(urlTitle);
@@ -137,13 +147,6 @@
           <td>${endTimeFormatted}</td>
         `;
         tbody.appendChild(row);
-      });
-
-      // Klik tombol cetak setelah DOM selesai dimuat
-      document.addEventListener('DOMContentLoaded', (event) => {
-        if (printButton) {
-          printButton.click();
-        }
       });
     });
 
