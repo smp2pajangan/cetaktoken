@@ -12,14 +12,14 @@
       margin-right: 15mm;
     }
     body {
-      font-family: "Times New Roman", Times, serif; /* Mengubah jenis huruf di sini */
+      font-family: "Times New Roman", Times, serif;
     }
     h2 {
       text-align: center;
       margin-bottom: 1em;
     }
     .no-print {
-      display: none; /* Menyembunyikan elemen ini saat dicetak */
+      display: none;
     }
     table {
       width: 100%;
@@ -53,7 +53,7 @@
 </head>
 <body>
   <h2 id="printDocumentTitle" style="text-align: center;">Daftar Token</h2>
-  <p class="instruction-text">Berikut adalah daftar token ujian:</p>
+  <p class="instruction-text"><b>Catatan: Token hanya bisa diakses sesuai dengan jadwal (token dibuka dan ditutup)!</b></p>
   <table id="printTable">
     <thead>
       <tr>
@@ -141,10 +141,9 @@
         tbody.appendChild(row);
       });
 
-      // Otomatis memicu pencetakan setelah data selesai dimuat dan ditampilkan
       setTimeout(() => {
         window.print();
-      }, 500); // Memberikan sedikit waktu agar tabel terisi sebelum mencetak
+      }, 500);
     });
   </script>
 </body>
