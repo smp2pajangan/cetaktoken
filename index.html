@@ -1,148 +1,229 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title id="printPageTitle">Cetak Daftar Token</title>
-  <style>
-    @page {
-      size: A4 portrait;
-      margin-top: 15mm;
-      margin-left: 30mm;
-      margin-bottom: 15mm;
-      margin-right: 15mm;
-    }
-    body {
-      font-family: "Times New Roman", Times, serif;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 1em;
-    }
-    .no-print {
-      display: none;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th {
-      background-color: #f4f4f4;
-      text-align: center;
-      border: 1px solid black;
-      padding: 8px;
-      font-size: 10pt;
-    }
-    td {
-      border: 1px solid black;
-      padding: 8px;
-      font-size: 10pt;
-      text-align: center;
-    }
-    td:nth-child(2) {
-      text-align: left;
-    }
-    .instruction-text {
-      text-align: left;
-      margin-bottom: 9px;
-      font-size: 9pt;
-    }
-  </style>
-</head>
-<body>
-  <h2 id="printDocumentTitle" style="text-align: center;">Daftar Token</h2>
-  <p class="instruction-text"><b>Catatan:<b/> Token hanya bisa diakses sesuai dengan jadwal (token dibuka dan ditutup)!</p>
-  <table id="printTable">
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>Mapel</th>
-        <th>Kelas</th>
-        <th>Token</th>
-        <th>Token Dibuka</th>
-        <th>Token Ditutup</th>
-      </tr>
-    </thead>
-    <tbody id="printTableBody">
-    </tbody>
-  </table>
+    <meta charset="UTF-8">
+    <title>Cetak Kartu Ujian | All in One CBT</title>
+    <link href="https://aspd.jogjacbt.web.id/favicon.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="https://aspd.jogjacbt.web.id/assets/kartu/css/cetak.min.css">
+    <script type="text/javascript" src="https://aspd.jogjacbt.web.id/assets/kartu/plugins/jquery/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="https://aspd.jogjacbt.web.id/assets/kartu/plugins/jquery/jquery-migrate-1.4.1.min.js"></script>
+    <script type="text/javascript" src="https://aspd.jogjacbt.web.id/assets/kartu/plugins/qrcode/qrcode.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOBCX8x60pYqxtXmXMz2xc5dwC3HJH5EE",
+            authDomain: "ujian-online-berbasis-android.firebaseapp.com",
+            databaseURL: "https://ujian-online-berbasis-android-default-rtdb.firebaseio.com",
+            projectId: "ujian-online-berbasis-android",
+            storageBucket: "ujian-online-berbasis-android.appspot.com",
+            messagingSenderId: "923446282537",
+            appId: "1:923446282537:web:60d374dde8aca61f6a0f38"
+        };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAOBCX8x60pYqxtXmXMz2xc5dwC3HJH5EE",
-      authDomain: "ujian-online-berbasis-android.firebaseapp.com",
-      databaseURL: "https://ujian-online-berbasis-android-default-rtdb.firebaseio.com",
-      projectId: "ujian-online-berbasis-android",
-      storageBucket: "ujian-online-berbasis-android.appspot.com",
-      messagingSenderId: "923446282537",
-      appId: "1:923446282537:web:60d374dde8aca61f6a0f38"
-    };
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const kartuUjianRef = ref(database, 'kartu_ujian');
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const tokensRef = ref(db, 'tokens');
+        function prosesFile() {
+            console.log("Tombol Proses Diklik!");
 
-    function getQueryParam(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
-    }
+            const fileInput = document.getElementById('fileUpload');
+            const file = fileInput.files[0];
 
-    const pageTitleElement = document.getElementById('printPageTitle');
-    const documentTitleElement = document.getElementById('printDocumentTitle');
-    const urlTitle = getQueryParam('title');
+            if (file) {
+                const reader = new FileReader();
 
-    if (urlTitle) {
-      pageTitleElement.innerText = decodeURIComponent(urlTitle);
-      documentTitleElement.innerText = decodeURIComponent(urlTitle);
-    }
+                reader.onload = function(e) {
+                    console.log("File berhasil dibaca oleh FileReader!");
 
-    onValue(tokensRef, (snapshot) => {
-      const tbody = document.getElementById('printTableBody');
-      tbody.innerHTML = '';
-      let counter = 0;
-      const tokens = [];
-      snapshot.forEach(child => {
-        tokens.push(child.val());
-      });
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      tokens.sort((a, b) => {
-        const kelasA = parseInt(a.kelas);
-        const kelasB = parseInt(b.kelas);
+                    console.log("Data dari XLSX:", jsonData);
 
-        if (!isNaN(kelasA) && !isNaN(kelasB)) {
-          if (kelasA !== kelasB) return kelasA - kelasB;
-        } else if (typeof a.kelas === 'string' && typeof b.kelas === 'string' && a.kelas !== b.kelas) {
-          return a.kelas.localeCompare(b.kelas);
+                    // Kirim data ke Firebase Realtime Database
+                    jsonData.forEach(siswa => {
+                        push(kartuUjianRef, siswa)
+                            .then(() => {
+                                console.log("Data siswa berhasil dikirim ke Firebase:", siswa);
+                            })
+                            .catch((error) => {
+                                console.error("Error mengirim data ke Firebase:", error);
+                            });
+                    });
+
+                    alert("Data dari file XLSX berhasil dikirim ke Firebase!");
+                };
+
+                reader.onerror = function(error) {
+                    console.error("Terjadi kesalahan saat membaca file:", error);
+                    alert("Terjadi kesalahan saat membaca file XLSX.");
+                };
+
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert("Pilih file XLSX terlebih dahulu.");
+            }
         }
 
-        const timeA = new Date(a.startTime).getTime();
-        const timeB = new Date(b.startTime).getTime();
-        return timeA - timeB;
-      });
+        function tampilkanDataKartuUjian() {
+            const mainContainer = document.createElement('div');
+            mainContainer.className = 'page';
+            const centerElement = document.createElement('center');
+            const tableElement = document.createElement('table');
+            tableElement.align = 'center';
+            tableElement.width = '100%';
+            const tbodyElement = document.createElement('tbody');
 
-      tokens.forEach(data => {
-        counter++;
-        const row = document.createElement('tr');
-        const startTimeFormatted = data.startTime ? new Date(data.startTime).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
-        const endTimeFormatted = data.endTime ? new Date(data.endTime).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
-        row.innerHTML = `
-          <td>${counter}</td>
-          <td>${data.subject}</td>
-          <td>${data.kelas}</td>
-          <td>${data.token}</td>
-          <td>${startTimeFormatted}</td>
-          <td>${endTimeFormatted}</td>
-        `;
-        tbody.appendChild(row);
-      });
+            onValue(kartuUjianRef, (snapshot) => {
+                const data = snapshot.val();
+                tbodyElement.innerHTML = ''; // Bersihkan data sebelumnya
 
-      setTimeout(() => {
-        window.print();
-      }, 500);
-    });
-  </script>
+                if (data) {
+                    let row;
+                    let cardCount = 0;
+                    Object.keys(data).forEach(key => {
+                        const kartu = data[key];
+
+                        if (cardCount % 2 === 0) {
+                            row = document.createElement('tr');
+                            tbodyElement.appendChild(row);
+                        }
+
+                        const tdElement = document.createElement('td');
+                        tdElement.style.padding = '3px';
+
+                        const kartuTable = document.createElement('table');
+                        kartuTable.style.width = '10.4cm';
+                        kartuTable.style.border = '1px solid #666';
+                        kartuTable.className = 'kartu';
+                        const kartuTbody = document.createElement('tbody');
+
+                        let innerHTML = `
+                            <tr>
+                                <td colspan="3" style="border-bottom:1px solid #666; padding: 0;">
+                                    <table width="100%" class="kartu">
+                                        <tbody>
+                                            <tr>
+                                                <td style="padding: 4px"><img src="https://aspd.jogjacbt.web.id/assets/kartu/img/tutwuri.jpg" height="40"></td>
+                                                <td align="center" style="font-weight:bold; padding: 4px;">
+                                                    KARTU LOGIN PESERTA <br/> ASESMEN STANDARISASI PENDIDIKAN DAERAH<br/>TAHUN PELAJARAN 2024/2025
+                                                </td>
+                                                <td style="padding: 4px; text-align: right">
+                                                    <div class="qrcode" id="qr_${key}" data-value="${kartu['Nomor Peserta'] || ''}" style="float: right" title="${kartu['Nomor Peserta'] || ''}">
+                                                        <canvas width="40" height="40" style="display: none;"></canvas>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr><td width="105">Nama Peserta</td><td width="1">:</td><td>${kartu['Nama Lengkap'] || ''}</td></tr>
+                            <tr><td>Kelas</td><td>:</td><td>${kartu.Kelas || ''}</td></tr>
+                            <tr><td>Ruang</td><td>:</td><td>${kartu.Ruang || ''}</td></tr>
+                            <tr><td>Username Login</td><td>:</td><td style="font-size:12px;font-weight:bold;">${kartu['Nomor Peserta'] || ''}</td></tr>
+                            <tr><td>Password Login</td><td>:</td><td style="font-size:12px;font-weight:bold;">********</td></tr>
+                            <tr><td colspan="3"></td></tr>
+                            <tr>
+                                <td colspan="3">
+                                    <table width="100%">
+                                        <tbody>
+                                            <tr>
+                                                <td valign="top" style="padding: 0">
+                                                    <table style="border:solid 1px black">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style="border-bottom:1px solid black"><i><b>Catatan:</b></i></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    Tetap semangat dan selalu patuhi protokol kesehatan.
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        `;
+
+                        kartuTbody.innerHTML = innerHTML;
+                        kartuTable.appendChild(kartuTbody);
+                        tdElement.appendChild(kartuTable);
+                        row.appendChild(tdElement);
+
+                        // Generate QR code
+                        setTimeout(() => {
+                            const qrcodeDiv = document.getElementById(`qr_${key}`);
+                            if (qrcodeDiv) {
+                                new QRCode(qrcodeDiv, {
+                                    text: kartu['Nomor Peserta'] || '',
+                                    width: 40,
+                                    height: 40
+                                });
+                            }
+                        }, 10); // Penundaan singkat untuk memastikan div sudah dirender
+
+                        cardCount++;
+                    });
+                } else {
+                    tbodyElement.innerHTML = '<tr><td colspan="2">Tidak ada data kartu ujian.</td></tr>';
+                }
+
+                tableElement.appendChild(tbodyElement);
+                centerElement.appendChild(tableElement);
+                mainContainer.appendChild(centerElement);
+
+                const hasilTabelDiv = document.getElementById('hasilTabel');
+                hasilTabelDiv.innerHTML = ''; // Bersihkan tabel sebelumnya
+                hasilTabelDiv.appendChild(mainContainer);
+            });
+        }
+
+        function cetakKartu(key) {
+            // Implementasikan logika untuk mengambil data berdasarkan key dan menampilkan satu kartu untuk dicetak
+            alert(`Fungsi cetak kartu untuk key: ${key} akan diimplementasikan.`);
+        }
+
+        // Panggil fungsi untuk menampilkan data saat halaman dimuat
+        tampilkanDataKartuUjian();
+    </script>
+</head>
+<body>
+    <h1>Pembuat Kartu Ujian</h1>
+
+    <div>
+        <a href="https://drive.google.com/uc?export=download&id=1ffhfPpQlKsuRgmXXB38q6HWM9KWsTAg3" id="downloadTemplate">Unduh Template XLSX</a>
+    </div>
+
+    <hr>
+
+    <div>
+        <label for="fileUpload">Unggah File XLSX yang Sudah Diisi:</label>
+        <input type="file" id="fileUpload" accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+    </div>
+
+    <div>
+        <button onclick="prosesFile()">Proses</button>
+    </div>
+
+    <div id="hasilTabel">
+    </div>
+
+    <div id="hasil" style="display:none;">
+        <h2>Data dari File XLSX:</h2>
+        <pre><code id="dataXLSX"></code></pre>
+    </div>
+
+    <script src="https://unpkg.com/xlsx/xlsx.full.min.js"></script>
 </body>
 </html>
