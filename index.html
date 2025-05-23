@@ -145,8 +145,11 @@
 
         // Jalankan saat DOM selesai dimuat
         document.addEventListener('DOMContentLoaded', () => {
-            const printTitle = getUrlParameter('title');
-            // Menggunakan innerHTML agar tag <br> diinterpretasikan sebagai baris baru
+            let printTitle = getUrlParameter('title');
+            // KONVERSI: Ganti karakter newline (\n) dengan tag <br> untuk baris baru di HTML
+            if (printTitle) {
+                printTitle = printTitle.replace(/\n/g, '<br>');
+            }
             document.getElementById('printTitle').innerHTML = printTitle || "DAFTAR TOKEN UJIAN"; // Gunakan judul dari URL atau default
 
             // Tampilkan pesan loading
