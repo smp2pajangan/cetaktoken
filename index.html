@@ -146,7 +146,8 @@
         // Jalankan saat DOM selesai dimuat
         document.addEventListener('DOMContentLoaded', () => {
             const printTitle = getUrlParameter('title');
-            document.getElementById('printTitle').textContent = printTitle || "DAFTAR TOKEN UJIAN"; // Gunakan judul dari URL atau default
+            // Menggunakan innerHTML agar tag <br> diinterpretasikan sebagai baris baru
+            document.getElementById('printTitle').innerHTML = printTitle || "DAFTAR TOKEN UJIAN"; // Gunakan judul dari URL atau default
 
             // Tampilkan pesan loading
             document.getElementById('tokenTableBody').innerHTML = '<tr><td colspan="6" class="message"><span class="spinner"></span> Memuat data token...</td></tr>';
