@@ -1,17 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Cetak Kartu Ujian | All in One CBT</title>
-    <link href="https://aspd.jogjacbt.web.id/favicon.ico" rel="shortcut icon">
-    <link rel="stylesheet" href="https://aspd.jogjacbt.web.id/assets/kartu/css/cetak.min.css">
-    <script type="text/javascript" src="https://aspd.jogjacbt.web.id/assets/kartu/plugins/jquery/jquery-3.2.1.min.js"></script>
-    <script type="text/javascript" src="https://aspd.jogjacbt.web.id/assets/kartu/plugins/jquery/jquery-migrate-1.4.1.min.js"></script>
-    <script type="text/javascript" src="https://aspd.jogjacbt.web.id/assets/kartu/plugins/qrcode/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Daftar Token</title>
+    <style>
+        /* Gaya dasar untuk tampilan di browser */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-size: 10pt; /* Ukuran font default untuk konten */
+            color: #333; /* Warna teks standar */
+        }
+
+        /* Gaya untuk judul utama */
+        h1 {
+            font-size: 16pt;
+            text-align: center;
+            margin-top: 20px; /* Spasi atas untuk tampilan di browser */
+            margin-bottom: 5mm; /* Spasi antara judul dan catatan */
+        }
+
+        /* Gaya untuk catatan */
+        p.note {
+            font-size: 10pt;
+            text-align: center;
+            margin-bottom: 10mm; /* Spasi antara catatan dan tabel */
+        }
+
+        /* Gaya dasar tabel */
+        table {
+            width: 95%; /* Lebar tabel sedikit kurang dari 100% untuk margin internal */
+            margin: 0 auto; /* Pusatkan tabel */
+            border-collapse: collapse;
+            font-size: 10pt;
+            page-break-inside: auto; /* Izinkan tabel untuk terpotong di antara halaman jika diperlukan */
+        }
+
+        /* Gaya untuk header dan sel tabel */
+        th, td {
+            border: 1px solid #000; /* Garis border hitam */
+            padding: 5px;
+            text-align: center; /* Default rata tengah */
+            vertical-align: top; /* Konten sel rata atas */
+        }
+
+        /* Gaya khusus untuk header tabel */
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        /* Penjajaran khusus untuk kolom Mapel (rata kiri) */
+        td.mapel {
+            text-align: left;
+        }
+
+        /* Gaya untuk pesan loading/error */
+        .message {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 12pt;
+            color: #555;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #007bff;
+            animation: spin 1s ease infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Gaya khusus untuk pencetakan */
+        @media print {
+            body {
+                /* Atur ukuran kertas A4 dan margin */
+                width: 21cm; /* Lebar A4 */
+                height: 29.7cm; /* Tinggi A4 */
+                margin: 1cm 1cm 1cm 2.5cm; /* Atas Kanan Bawah Kiri */
+                padding: 0; /* Pastikan tidak ada padding tambahan */
+                overflow: hidden; /* Sembunyikan scrollbar saat mencetak */
+            }
+
+            /* Pastikan konten mengisi halaman dengan benar */
+            html, body {
+                height: auto;
+                overflow: visible;
+            }
+
+            /* Hindari pemotongan elemen yang tidak diinginkan */
+            h1, p.note {
+                page-break-after: avoid; /* Hindari pemotongan setelah judul dan catatan */
+            }
+            thead {
+                display: table-header-group; /* Ulangi header tabel di setiap halaman */
+            }
+            tr {
+                page-break-inside: avoid; /* Jaga baris tabel agar tidak terpotong */
+                page-break-after: auto; /* Izinkan baris untuk terpotong setelahnya */
+            }
+            table {
+                width: 100%; /* Pastikan tabel mengisi lebar penuh margin cetak */
+                margin: 0; /* Hapus margin otomatis tabel saat mencetak */
+            }
+        }
+    </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
 
+        // Konfigurasi Firebase (HARUS SAMA DENGAN PANEL ADMIN ANDA)
         const firebaseConfig = {
             apiKey: "AIzaSyAOBCX8x60pYqxtXmXMz2xc5dwC3HJH5EE",
             authDomain: "ujian-online-berbasis-android.firebaseapp.com",
@@ -22,208 +129,113 @@
             appId: "1:923446282537:web:60d374dde8aca61f6a0f38"
         };
 
+        // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const kartuUjianRef = ref(database, 'kartu_ujian');
+        const db = getDatabase(app);
+        // Asumsi data token berada di node 'tokens' di Realtime Database Anda
+        const tokensRef = ref(db, 'tokens'); 
 
-        function prosesFile() {
-            console.log("Tombol Proses Diklik!");
-
-            const fileInput = document.getElementById('fileUpload');
-            const file = fileInput.files[0];
-
-            if (file) {
-                const reader = new FileReader();
-
-                reader.onload = function(e) {
-                    console.log("File berhasil dibaca oleh FileReader!");
-
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-                    console.log("Data dari XLSX:", jsonData);
-
-                    // Kirim data ke Firebase Realtime Database
-                    jsonData.forEach(siswa => {
-                        push(kartuUjianRef, siswa)
-                            .then(() => {
-                                console.log("Data siswa berhasil dikirim ke Firebase:", siswa);
-                            })
-                            .catch((error) => {
-                                console.error("Error mengirim data ke Firebase:", error);
-                            });
-                    });
-
-                    alert("Data dari file XLSX berhasil dikirim ke Firebase!");
-                };
-
-                reader.onerror = function(error) {
-                    console.error("Terjadi kesalahan saat membaca file:", error);
-                    alert("Terjadi kesalahan saat membaca file XLSX.");
-                };
-
-                reader.readAsArrayBuffer(file);
-            } else {
-                alert("Pilih file XLSX terlebih dahulu.");
-            }
+        // Fungsi untuk mengurai parameter URL
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
 
-        function tampilkanDataKartuUjian() {
-            const mainContainer = document.createElement('div');
-            mainContainer.className = 'page';
-            const centerElement = document.createElement('center');
-            const tableElement = document.createElement('table');
-            tableElement.align = 'center';
-            tableElement.width = '100%';
-            const tbodyElement = document.createElement('tbody');
+        // Jalankan saat DOM selesai dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            const printTitle = getUrlParameter('title');
+            document.getElementById('printTitle').textContent = printTitle || "DAFTAR TOKEN UJIAN"; // Gunakan judul dari URL atau default
 
-            onValue(kartuUjianRef, (snapshot) => {
-                const data = snapshot.val();
-                tbodyElement.innerHTML = ''; // Bersihkan data sebelumnya
+            // Tampilkan pesan loading
+            document.getElementById('tokenTableBody').innerHTML = '<tr><td colspan="6" class="message"><span class="spinner"></span> Memuat data token...</td></tr>';
 
-                if (data) {
-                    let row;
-                    let cardCount = 0;
-                    Object.keys(data).forEach(key => {
-                        const kartu = data[key];
-
-                        if (cardCount % 2 === 0) {
-                            row = document.createElement('tr');
-                            tbodyElement.appendChild(row);
-                        }
-
-                        const tdElement = document.createElement('td');
-                        tdElement.style.padding = '3px';
-
-                        const kartuTable = document.createElement('table');
-                        kartuTable.style.width = '10.4cm';
-                        kartuTable.style.border = '1px solid #666';
-                        kartuTable.className = 'kartu';
-                        const kartuTbody = document.createElement('tbody');
-
-                        let innerHTML = `
-                            <tr>
-                                <td colspan="3" style="border-bottom:1px solid #666; padding: 0;">
-                                    <table width="100%" class="kartu">
-                                        <tbody>
-                                            <tr>
-                                                <td style="padding: 4px"><img src="https://aspd.jogjacbt.web.id/assets/kartu/img/tutwuri.jpg" height="40"></td>
-                                                <td align="center" style="font-weight:bold; padding: 4px;">
-                                                    KARTU LOGIN PESERTA <br/> ASESMEN STANDARISASI PENDIDIKAN DAERAH<br/>TAHUN PELAJARAN 2024/2025
-                                                </td>
-                                                <td style="padding: 4px; text-align: right">
-                                                    <div class="qrcode" id="qr_${key}" data-value="${kartu['Nomor Peserta'] || ''}" style="float: right" title="${kartu['Nomor Peserta'] || ''}">
-                                                        <canvas width="40" height="40" style="display: none;"></canvas>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr><td width="105">Nama Peserta</td><td width="1">:</td><td>${kartu['Nama Lengkap'] || ''}</td></tr>
-                            <tr><td>Kelas</td><td>:</td><td>${kartu.Kelas || ''}</td></tr>
-                            <tr><td>Ruang</td><td>:</td><td>${kartu.Ruang || ''}</td></tr>
-                            <tr><td>Username Login</td><td>:</td><td style="font-size:12px;font-weight:bold;">${kartu['Nomor Peserta'] || ''}</td></tr>
-                            <tr><td>Password Login</td><td>:</td><td style="font-size:12px;font-weight:bold;">********</td></tr>
-                            <tr><td colspan="3"></td></tr>
-                            <tr>
-                                <td colspan="3">
-                                    <table width="100%">
-                                        <tbody>
-                                            <tr>
-                                                <td valign="top" style="padding: 0">
-                                                    <table style="border:solid 1px black">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style="border-bottom:1px solid black"><i><b>Catatan:</b></i></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>
-                                                                    Tetap semangat dan selalu patuhi protokol kesehatan.
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        `;
-
-                        kartuTbody.innerHTML = innerHTML;
-                        kartuTable.appendChild(kartuTbody);
-                        tdElement.appendChild(kartuTable);
-                        row.appendChild(tdElement);
-
-                        // Generate QR code
-                        setTimeout(() => {
-                            const qrcodeDiv = document.getElementById(`qr_${key}`);
-                            if (qrcodeDiv) {
-                                new QRCode(qrcodeDiv, {
-                                    text: kartu['Nomor Peserta'] || '',
-                                    width: 40,
-                                    height: 40
-                                });
-                            }
-                        }, 10); // Penundaan singkat untuk memastikan div sudah dirender
-
-                        cardCount++;
+            // Dapatkan data token dari Firebase secara real-time
+            onValue(tokensRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const tokensData = [];
+                    snapshot.forEach(child => {
+                        tokensData.push(child.val());
                     });
+                    renderTokenTable(tokensData);
+                    // Otomatis cetak setelah rendering selesai
+                    window.print();
                 } else {
-                    tbodyElement.innerHTML = '<tr><td colspan="2">Tidak ada data kartu ujian.</td></tr>';
+                    document.getElementById('tokenTableBody').innerHTML = '<tr><td colspan="6" class="message">Tidak ada data token yang ditemukan.</td></tr>';
+                    window.print(); // Cetak bahkan jika tidak ada data, untuk menampilkan pesan
                 }
+            }, (error) => {
+                console.error("Error fetching tokens:", error);
+                document.getElementById('tokenTableBody').innerHTML = '<tr><td colspan="6" class="message" style="color: red;">Error memuat data token.</td></tr>';
+                window.print(); // Cetak pesan error
+            });
+        });
 
-                tableElement.appendChild(tbodyElement);
-                centerElement.appendChild(tableElement);
-                mainContainer.appendChild(centerElement);
+        // Fungsi untuk merender data token ke dalam tabel HTML
+        function renderTokenTable(tokens) {
+            const tableBody = document.getElementById('tokenTableBody');
+            tableBody.innerHTML = ''; // Bersihkan baris yang ada
 
-                const hasilTabelDiv = document.getElementById('hasilTabel');
-                hasilTabelDiv.innerHTML = ''; // Bersihkan tabel sebelumnya
-                hasilTabelDiv.appendChild(mainContainer);
+            // Urutkan token: berdasarkan 'startTime' (timestamp), lalu berdasarkan 'kelas'
+            tokens.sort((a, b) => {
+                // Konversi 'startTime' ke timestamp untuk perbandingan
+                const timeA = new Date(a.startTime).getTime();
+                const timeB = new Date(b.startTime).getTime();
+
+                if (timeA !== timeB) {
+                    return timeA - timeB; // Urutkan dari waktu terlama ke terbaru
+                }
+                // Jika waktu token dibuka sama, urutkan berdasarkan kelas (abjad)
+                return String(a.kelas).localeCompare(String(b.kelas));
+            });
+
+            // Isi tabel dengan data token yang sudah diurutkan
+            tokens.forEach((token, index) => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = index + 1; // Kolom No (nomor urut)
+                row.insertCell(1).textContent = token.subject; // Kolom Mapel (menggunakan 'subject')
+                row.insertCell(2).textContent = token.kelas; // Kolom Kelas
+                row.insertCell(3).textContent = token.token; // Kolom Token
+                row.insertCell(4).textContent = formatDateTime(token.startTime); // Kolom Token Dibuka
+                row.insertCell(5).textContent = formatDateTime(token.endTime); // Kolom Token Ditutup
+
+                // Terapkan penjajaran khusus untuk kolom Mapel (rata kiri)
+                row.cells[1].classList.add('mapel');
             });
         }
 
-        function cetakKartu(key) {
-            // Implementasikan logika untuk mengambil data berdasarkan key dan menampilkan satu kartu untuk dicetak
-            alert(`Fungsi cetak kartu untuk key: ${key} akan diimplementasikan.`);
+        // Fungsi pembantu untuk memformat string tanggal/waktu untuk tampilan
+        function formatDateTime(dateTimeString) {
+            if (!dateTimeString) return '-'; // Jika string kosong atau null, tampilkan '-'
+            const date = new Date(dateTimeString);
+            const options = {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: false // Format 24 jam
+            };
+            // Mengganti titik (misal 10.30) dengan titik dua (10:30) jika ada
+            return date.toLocaleString('id-ID', options).replace(/\./g, ':');
         }
-
-        // Panggil fungsi untuk menampilkan data saat halaman dimuat
-        tampilkanDataKartuUjian();
     </script>
 </head>
 <body>
-    <h1>Pembuat Kartu Ujian</h1>
+    <h1 id="printTitle"></h1>
+    <p class="note">Catatan: Token hanya bisa diakses sesuai dengan jadwal Token Dibuka dan Token Ditutup</p>
 
-    <div>
-        <a href="https://drive.google.com/uc?export=download&id=1ffhfPpQlKsuRgmXXB38q6HWM9KWsTAg3" id="downloadTemplate">Unduh Template XLSX</a>
-    </div>
-
-    <hr>
-
-    <div>
-        <label for="fileUpload">Unggah File XLSX yang Sudah Diisi:</label>
-        <input type="file" id="fileUpload" accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-    </div>
-
-    <div>
-        <button onclick="prosesFile()">Proses</button>
-    </div>
-
-    <div id="hasilTabel">
-    </div>
-
-    <div id="hasil" style="display:none;">
-        <h2>Data dari File XLSX:</h2>
-        <pre><code id="dataXLSX"></code></pre>
-    </div>
-
-    <script src="https://unpkg.com/xlsx/xlsx.full.min.js"></script>
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th class="mapel">Mapel</th>
+                <th>Kelas</th>
+                <th>Token</th>
+                <th>Token Dibuka</th>
+                <th>Token Ditutup</th>
+            </tr>
+        </thead>
+        <tbody id="tokenTableBody">
+            <tr><td colspan="6" class="message"><span class="spinner"></span> Memuat data token...</td></tr>
+        </tbody>
+    </table>
 </body>
 </html>
